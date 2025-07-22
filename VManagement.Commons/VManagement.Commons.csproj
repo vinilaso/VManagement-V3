@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <BaseOutputPath>C:\VManagementV3\Bin</BaseOutputPath>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>  
   </PropertyGroup>
 
 </Project>
