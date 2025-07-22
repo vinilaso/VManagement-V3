@@ -20,7 +20,6 @@
   <ItemGroup>
     <ProjectReference Include="..\VManagement.Commons\VManagement.Commons.csproj" />
     <ProjectReference Include="..\VManagement.Database\VManagement.Database.csproj" />
-    <ProjectReference Include="..\VManagement\VManagement.Database.csproj" />
   </ItemGroup>
 
   <ItemGroup>
