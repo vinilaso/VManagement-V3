@@ -1,5 +1,6 @@
 ﻿using Microsoft.Data.SqlClient;
 using VManagement.Commons.Entities;
+using VManagement.Database.Clauses;
 using VManagement.Database.Command;
 using VManagement.Database.Exceptions;
 using VManagement.Database.Tests.TestEntities;
@@ -86,6 +87,37 @@ namespace VManagement.Database.Tests.Command
         }
 
         [TestMethod]
+        public void BuildSelectCommand_WhenAutoGenerateRestrictionIsTrue_ShouldAppendExistingCondition()
+        {
+            CommandBuilderOptions options = new()
+            {
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = false,
+                AppendExistingRestriction = true
+            };
+
+            const string NAME_PARAM_VALUE = "JOÃO";
+
+            Restriction preRestriction = new("UPPER(V.NAME) = @pNAME");
+            preRestriction.Parameters.Add("pNAME", NAME_PARAM_VALUE);
+
+            preRestriction.OrderBy("V.ID", OrderByClause.SortDirection.Descending);
+
+            CommandBuilder<UsersTestEntity> commandBuilder = new(options, preRestriction: preRestriction);
+            CommandBuilderResult result = commandBuilder.BuildSelectCommand();
+
+            Assert.AreNotEqual(string.Empty, result.CommandText, "O CommandText não deveria estar vazio.");
+            Assert.AreEqual(1, result.Restriction.Parameters.Count, "O comando deveria ter um parâmetro.");
+
+            SqlParameter parameter = result.Restriction.Parameters[0];
+
+            Assert.AreEqual(NAME_PARAM_VALUE, parameter.Value, "O valor do parâmetro no comando está incorreto.");
+
+            string expectedFullQuery = $"SELECT ID, NAME, BIRTHDATE FROM USERS_TEST V WHERE ((UPPER(V.NAME) = {parameter.ParameterName})) ORDER BY V.ID DESC";
+            Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
+        }
+
+        [TestMethod]
         public void BuildUpdateCommand_WhenNameIsChanged_ShouldAppendJustNameColumnToUpdate()
         {
             const int
@@ -116,6 +148,66 @@ namespace VManagement.Database.Tests.Command
             Assert.AreEqual(user.Name, nameParemeter.Value, "O valor do parâmetro para NAME está incorreto.");
 
             string expectedFullQuery = $"UPDATE USERS_TEST SET NAME = {nameParemeter.ParameterName} WHERE (ID = {idParameter.ParameterName})";
+            Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
+        }
+
+        [TestMethod]
+        public void BuildInsertCommand_ShouldCreateCorrectParams()
+        {
+            const int
+                NAME_PARAM_INDEX = 0,
+                BIRTH_PARAM_INDEX = 1;
+
+            CommandBuilderOptions options = new()
+            {
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = false
+            };
+
+            UsersTestEntity user = TableEntityFactory.CreateInstanceFor<UsersTestEntity>();
+            user.Name = "João";
+            user.BirthDate = new DateTime(2006, 4, 12);
+
+            CommandBuilder<UsersTestEntity> commandBuilder = new(options, entity: user);
+            CommandBuilderResult result = commandBuilder.BuildInsertCommand();
+
+            Assert.AreNotEqual(string.Empty, result.CommandText, "O CommandText gerado não deveria ser vazio.");
+            Assert.AreEqual(2, result.Restriction.Parameters.Count, "O número de parâmetros gerados está incorreto.");
+
+            SqlParameter
+                nameParameter = result.Restriction.Parameters[NAME_PARAM_INDEX],
+                birthParameter = result.Restriction.Parameters[BIRTH_PARAM_INDEX];
+
+            Assert.AreEqual(user.Name, nameParameter.Value, "O valor do parâmetro para NAME está incorreto.");
+            Assert.AreEqual(user.BirthDate, birthParameter.Value, "O valor do parâmetro para BIRTHDATE está incorreto.");
+
+            string expectedFullQuery = $"INSERT INTO USERS_TEST (NAME, BIRTHDATE) OUTPUT INSERTED.ID VALUES ({nameParameter.ParameterName}, {birthParameter.ParameterName})";
+            Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
+        }
+
+        [TestMethod]
+        public void BuildDeleteCommand_ShouldCreateCorrectParams()
+        {
+            CommandBuilderOptions options = new()
+            {
+                AutoGenerateRestriction = true,
+                PopulateCommandObject = false
+            };
+
+            UsersTestEntity user = TableEntityFactory.CreateInstanceFor<UsersTestEntity>();
+            user.Id = 1;
+
+            CommandBuilder<UsersTestEntity> commandBuilder = new(options, entity: user);
+            CommandBuilderResult result = commandBuilder.BuildDeleteCommand();
+
+            Assert.AreNotEqual(string.Empty, result.CommandText, "O CommandText gerado não deveria ser vazio.");
+            Assert.AreEqual(1, result.Restriction.Parameters.Count, "O número de parâmetros gerados está incorreto.");
+
+            SqlParameter idParameter = result.Restriction.Parameters[0];
+
+            Assert.AreEqual(user.Id, idParameter.Value, "O valor do parâmetro para ID está incorreto.");
+
+            string expectedFullQuery = $"DELETE FROM USERS_TEST WHERE (ID = {idParameter.ParameterName})";
             Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
         }
     }

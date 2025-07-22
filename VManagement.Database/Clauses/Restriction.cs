@@ -5,7 +5,7 @@ namespace VManagement.Database.Clauses
 {
     public class Restriction
     {
-        public static readonly Restriction Empty = new();
+        public static Restriction Empty => new();
 
         public WhereClause WhereClause { get; set; } = new();
         public OrderByClause OrderByClause { get; set; } = new();

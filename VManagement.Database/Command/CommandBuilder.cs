@@ -57,9 +57,6 @@ namespace VManagement.Database.Command
             DelimitedStringBuilder fieldsBuilder = new(", ");
             Restriction restriction = CreateRestriction();
 
-            if (_preRestriction != null)
-                restriction.Append(_preRestriction);
-
             foreach (PropertyInfo property in GetColumnProperties())
                 if (property.GetCustomAttribute<EntityColumnNameAttribute>() is EntityColumnNameAttribute attribute)
                     fieldsBuilder.Append(attribute.ColumnName);
@@ -158,13 +155,22 @@ namespace VManagement.Database.Command
 
         private Restriction CreateRestriction(bool withAlias = true)
         {
-            if (!_options.AutoGenerateRestriction)
-                return Restriction.Empty;
+            Restriction restriction = Restriction.Empty;
 
-            if (_entity is null)
-                throw CommandBuilderAbortedException.InvalidEntity;
+            if (_options.AutoGenerateRestriction)
+            {
+                if (_entity is null)
+                    throw CommandBuilderAbortedException.InvalidEntity;
 
-            return Restriction.FromId(_entity.Id, withAlias, _options.MainTableAlias);
+                restriction = Restriction.FromId(_entity.Id, withAlias, _options.MainTableAlias);
+            }
+
+            if (_options.AppendExistingRestriction && _preRestriction is not null)
+            {
+                restriction.Append(_preRestriction);
+            }                    
+            
+            return restriction;
         }
 
         private void PopulateCommand(string commandText, Restriction restriction)
@@ -251,6 +257,8 @@ namespace VManagement.Database.Command
         /// O padrão é <see langword="true"/>.
         /// </summary>
         internal bool PopulateCommandObject { get; set; } = true;
+
+        internal bool AppendExistingRestriction { get; set; } = false;
 
         /// <summary>
         /// Obtém ou define o alias (apelido) a ser usado para a tabela principal na consulta SQL.
