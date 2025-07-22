@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <AssemblyVersion>3.0</AssemblyVersion>
     <FileVersion>3.0</FileVersion>
+    <BaseOutputPath>C:\VManagementV3\Bin</BaseOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
