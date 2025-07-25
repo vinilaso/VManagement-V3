@@ -1,11 +1,12 @@
 ﻿using Microsoft.Data.SqlClient;
+using VManagement.Database.Generalization;
 
 namespace VManagement.Database.Connection
 {
     /// <summary>
     /// Representa uma conexão com o banco de dados.
     /// </summary>
-    internal sealed class VManagementConnection : IDisposable
+    internal sealed class VManagementConnection : IDisposable, IVManagementConnection
     {
         private readonly SqlConnection _connection;
         private readonly bool _ownsConnection;
@@ -33,7 +34,7 @@ namespace VManagement.Database.Connection
         /// Cria um comando com a conexão atual.
         /// </summary>
         /// <returns>Uma instância de <see cref="VManagementCommand"/> com a conexão atual.</returns>
-        internal VManagementCommand CreateCommand()
+        public IVManagementCommand CreateCommand()
         {
             return new VManagementCommand(_connection);
         }

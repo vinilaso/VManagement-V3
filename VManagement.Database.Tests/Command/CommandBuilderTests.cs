@@ -101,7 +101,7 @@ namespace VManagement.Database.Tests.Command
             Restriction preRestriction = new("UPPER(V.NAME) = @pNAME");
             preRestriction.Parameters.Add("pNAME", NAME_PARAM_VALUE);
 
-            preRestriction.OrderBy("V.ID", OrderByClause.SortDirection.Descending);
+            preRestriction.AddSorting("V.ID", OrderByClause.SortDirection.Descending);
 
             CommandBuilder<UsersTestEntity> commandBuilder = new(options, preRestriction: preRestriction);
             CommandBuilderResult result = commandBuilder.BuildSelectCommand();

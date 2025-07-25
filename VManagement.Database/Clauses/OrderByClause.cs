@@ -45,6 +45,14 @@ namespace VManagement.Database.Clauses
         }
 
         /// <summary>
+        /// Adiciona uma cláusula ORDER BY RANDOM à esta instância.
+        /// </summary>
+        public void OrderByRandom()
+        {
+            _sortings.Add(SortDirection.Random.GetDescription());
+        }
+
+        /// <summary>
         /// Adiciona uma cláusula order by à esta instância.
         /// </summary>
         /// <param name="other">A cláusula a ser adicionada.</param>

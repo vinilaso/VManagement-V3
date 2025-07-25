@@ -15,7 +15,8 @@ namespace VManagement.Database.Clauses
         /// <param name="where">A cláusula where.</param>
         public void AddWhere(string where)
         {
-            _restrictions.Add(where.BetweenParenthesis());
+            if (!string.IsNullOrEmpty(where))
+                _restrictions.Add(where.BetweenParenthesis());
         }
 
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Runtime.CompilerServices;
+using VManagement.Commons.Entities;
 using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 using VManagement.Commons.Exceptions;
@@ -41,7 +42,7 @@ namespace VManagement.Database.Command
         internal CommandBuilder(CommandBuilderOptions options, TTableEntity? entity = default, Restriction? preRestriction = null, IVManagementCommand? command = null)
         {
             ValidateGenericParam();
-            TableName = GetTableName();
+            TableName = TableEntityHelper<TTableEntity>.GetTableName();
             _options = options;
             _entity = entity;
             _preRestriction = preRestriction;
@@ -57,7 +58,7 @@ namespace VManagement.Database.Command
             DelimitedStringBuilder fieldsBuilder = new(", ");
             Restriction restriction = CreateRestriction();
 
-            foreach (PropertyInfo property in GetColumnProperties())
+            foreach (PropertyInfo property in TableEntityHelper<TTableEntity>.GetColumnProperties())
                 if (property.GetCustomAttribute<EntityColumnNameAttribute>() is EntityColumnNameAttribute attribute)
                     fieldsBuilder.Append(attribute.ColumnName);
 
@@ -77,7 +78,7 @@ namespace VManagement.Database.Command
             DelimitedStringBuilder fieldsBuilder = new(", ");
             Restriction restriction = CreateRestriction(withAlias: false);
 
-            foreach (PropertyInfo property in GetColumnProperties())
+            foreach (PropertyInfo property in TableEntityHelper<TTableEntity>.GetColumnProperties())
             {
                 if (property.GetCustomAttribute<EntityColumnNameAttribute>() is EntityColumnNameAttribute attribute)
                 {
@@ -114,7 +115,7 @@ namespace VManagement.Database.Command
             DelimitedStringBuilder valuesBuilder = new(", ");
             Restriction restriction = Restriction.Empty;
 
-            foreach (PropertyInfo property in GetColumnProperties())
+            foreach (PropertyInfo property in TableEntityHelper<TTableEntity>.GetColumnProperties())
             {
                 if (property.GetCustomAttribute<EntityColumnNameAttribute>() is EntityColumnNameAttribute attribute)
                 {
@@ -193,24 +194,6 @@ namespace VManagement.Database.Command
         {
             if (!Attribute.IsDefined(typeof(TTableEntity), typeof(TableEntityAttribute)))
                 throw new NotTableEntityException(typeof(TTableEntity).FullName.GetValueOrDefault("tipo indefinido"));
-        }
-
-        /// <summary>
-        /// Resgata o nome da tabela do banco de dados que <typeparamref name="TTableEntity"/> representa.
-        /// </summary>
-        /// <returns>O nome da tabela.</returns>
-        private static string GetTableName()
-        {
-            return typeof(TTableEntity).GetCustomAttribute<TableEntityAttribute>()!.TableName;
-        }
-
-        /// <summary>
-        /// Resgata as colunas da tabela do banco de dados que <typeparamref name="TTableEntity"/> representa.
-        /// </summary>
-        /// <returns>Uma lista de <see cref="PropertyInfo"/> que possuem <see cref="EntityColumnNameAttribute"/> em sua definição.</returns>
-        private static IEnumerable<PropertyInfo> GetColumnProperties()
-        {
-            return typeof(TTableEntity).GetProperties().Where(p => Attribute.IsDefined(p, typeof(EntityColumnNameAttribute)));
         }
     }
 

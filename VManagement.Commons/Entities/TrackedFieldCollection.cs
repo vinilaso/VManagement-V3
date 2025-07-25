@@ -3,6 +3,13 @@ using VManagement.Commons.Exceptions;
 
 namespace VManagement.Commons.Entities
 {
+    /// <summary>
+    /// Representa uma coleção de campos rastreáveis (<see cref="ITrackedField"/>) para uma entidade.
+    /// </summary>
+    /// <remarks>
+    /// Esta classe herda de <see cref="List{T}"/> e adiciona funcionalidades específicas para o gerenciamento
+    /// de campos rastreáveis, como um indexador para busca por nome e validações para garantir a integridade da coleção.
+    /// </remarks>
     public class TrackedFieldCollection : List<ITrackedField>, ITrackedFieldCollection
     {
         /// <summary>
@@ -22,6 +29,15 @@ namespace VManagement.Commons.Entities
             }
         }
 
+        /// <summary>
+        /// Adiciona um novo campo rastreado à coleção, aplicando validações.
+        /// </summary>
+        /// <remarks>
+        /// Este método oculta o método Add base de <see cref="List{T}"/> para garantir que apenas
+        /// campos válidos (com nome não nulo e único) sejam adicionados à coleção.
+        /// </remarks>
+        /// <param name="trackedField">O campo rastreado a ser adicionado.</param>
+        /// <exception cref="InvalidFieldException">Lançada se o nome do campo for nulo/vazio ou se já existir um campo com o mesmo nome na coleção.</exception>
         public new void Add(ITrackedField trackedField)
         {
             if (string.IsNullOrEmpty(trackedField.Name))

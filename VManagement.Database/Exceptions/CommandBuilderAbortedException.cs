@@ -1,5 +1,15 @@
 ﻿namespace VManagement.Database.Exceptions
 {
+    /// <summary>
+    /// Representa o erro que ocorre quando a construção de um comando SQL pelo <see cref="Command.CommandBuilder{TTableEntity}"/>
+    /// é abortada devido a uma configuração ou estado inválido.
+    /// </summary>
+    /// <remarks>
+    /// Esta exceção é utilizada para fornecer mensagens de erro claras e específicas quando as opções do CommandBuilder
+    /// entram em conflito com os parâmetros fornecidos (por exemplo, tentar popular um objeto de comando que não foi passado).
+    /// Utilize as propriedades estáticas <see cref="InvalidEntity"/> e <see cref="InvalidCommand"/> para obter instâncias
+    /// pré-configuradas para os cenários de erro mais comuns.
+    /// </remarks>
     public class CommandBuilderAbortedException(string message) : Exception(message)
     {
         /// <summary>

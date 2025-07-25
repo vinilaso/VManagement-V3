@@ -2,6 +2,15 @@
 
 namespace VManagement.Commons.Entities
 {
+    /// <summary>
+    /// Representa a implementação concreta de um campo de entidade que rastreia seu estado e alterações.
+    /// </summary>
+    /// <remarks>
+    /// Esta classe é o coração do mecanismo de rastreamento de alterações. Para cada propriedade de uma entidade
+    /// mapeada para uma coluna, uma instância de <see cref="TrackedField"/> é criada. Ela armazena o valor original
+    /// e o valor atual, permitindo que a propriedade <see cref="Changed"/> determine se o campo precisa ser
+    /// incluído em uma operação de UPDATE.
+    /// </remarks>
     public class TrackedField : ITrackedField
     {
         /// <summary>

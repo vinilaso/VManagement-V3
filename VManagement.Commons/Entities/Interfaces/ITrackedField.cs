@@ -1,5 +1,13 @@
 ﻿namespace VManagement.Commons.Entities.Interfaces
 {
+    /// <summary>
+    /// Define um contrato para um campo de entidade que rastreia seu estado e alterações.
+    /// </summary>
+    /// <remarks>
+    /// Esta interface é a base do mecanismo de rastreamento de alterações do ORM. Cada propriedade de uma entidade
+    /// mapeada para uma coluna do banco de dados é representada por um ITrackedField, permitindo que o sistema
+    /// saiba exatamente quais valores foram modificados para gerar comandos de UPDATE eficientes.
+    /// </remarks>
     public interface ITrackedField
     {
         /// <summary>
@@ -23,15 +31,22 @@
         bool IsNull { get; }
 
         /// <summary>
-        // Obtém um valor que indica se o campo foi alterado.
+        /// Obtém um valor que indica se o campo foi alterado.
         /// </summary>
         bool Changed { get; }
 
         /// <summary>
-        /// Altera o valor atual do campo.
+        /// Altera o valor atual do campo, marcando-o como 'modificado' se o novo valor for diferente do original.
         /// </summary>
-        /// <param name="newValue">O novo valor a ser definido.</param>
+        /// <param name="newValue">O novo valor a ser atribuído ao campo.</param>
         void ChangeValue(object? newValue);
+
+        /// <summary>
+        /// Define um valor para o campo, atualizando tanto o valor atual quanto o original.
+        /// Isso efetivamente "reseta" o estado de alteração do campo, marcando-o como não modificado.
+        /// </summary>
+        /// <param name="newValue">O novo valor a ser definido como atual e original.</param>
+        void SetValue(object? newValue);
 
         /// <summary>
         /// Converte o valor do campo para <see cref="string"/>.

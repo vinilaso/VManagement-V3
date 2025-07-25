@@ -7,12 +7,7 @@
 
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <BaseOutputPath>C:\VManagementV3\Bin</BaseOutputPath>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="..\VManagement.Database\.editorconfig" Link=".editorconfig" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.0" />
@@ -22,12 +17,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\VManagement.Commons\VManagement.Commons.csproj" />
-    <ProjectReference Include="..\VManagement.Database\VManagement.Database.csproj" />
+    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
   </ItemGroup>
 
   <ItemGroup>
-    <Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+    <ProjectReference Include="..\VManagement.Commons\VManagement.Commons.csproj" />
+    <ProjectReference Include="..\VManagement.Core\VManagement.Core.csproj" />
+    <ProjectReference Include="..\VManagement.Database\VManagement.Database.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <BaseOutputPath>C:\VManagementV3\Bin</BaseOutputPath>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VManagement.Commons\VManagement.Commons.csproj" />
+    <ProjectReference Include="..\VManagement.Database\VManagement.Database.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,5 +1,12 @@
 ﻿namespace VManagement.Commons.Exceptions
 {
+    /// <summary>
+    /// Representa o erro que ocorre ao tentar acessar um campo que não existe em uma coleção de campos da entidade.
+    /// </summary>
+    /// <remarks>
+    /// Esta exceção é tipicamente lançada ao usar o indexador de uma <see cref="TrackedFieldCollection"/>
+    /// com um nome de campo que não corresponde a nenhuma propriedade mapeada na entidade.
+    /// </remarks>
     public class FieldNotFoundException : Exception
     {
         /// <summary>

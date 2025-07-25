@@ -3,7 +3,10 @@ using VManagement.Database.Command;
 
 namespace VManagement.Database.Clauses
 {
-    public class Restriction
+    /// <summary>
+    /// Fornece um mecanismo para a construção de cláusulas WHERE e ORDER BY.
+    /// </summary>
+    public partial class Restriction
     {
         /// <summary>
         /// Obtém uma instância de restrição vazia.
@@ -64,7 +67,7 @@ namespace VManagement.Database.Clauses
         /// </summary>
         /// <param name="orderByClause">O campo pelo qual ordenar.</param>
         /// <param name="sortDirection">A direção da ordenação (ascendente ou descendente).</param>
-        public void OrderBy(string orderByClause, OrderByClause.SortDirection sortDirection = OrderByClause.SortDirection.Ascending)
+        public void AddSorting(string orderByClause, OrderByClause.SortDirection sortDirection = OrderByClause.SortDirection.Ascending)
         {
             OrderByClause.AddSorting(orderByClause, sortDirection);
         }
@@ -73,7 +76,7 @@ namespace VManagement.Database.Clauses
         /// Adiciona todas as regras de ordenação de outra <see cref="OrderByClause"/>.
         /// </summary>
         /// <param name="orderByClause">A cláusula ORDER BY a ser adicionada.</param>
-        public void OrderBy(OrderByClause orderByClause)
+        public void AddSorting(OrderByClause orderByClause)
         {
             OrderByClause.AddSorting(orderByClause);
         }
@@ -87,8 +90,12 @@ namespace VManagement.Database.Clauses
             if (other == null)
                 return;
 
-            AddWhere(other.WhereClause);
-            OrderBy(other.OrderByClause);
+            if (!other.WhereClause.IsEmpty())
+                AddWhere(other.WhereClause);
+
+            if (!other.OrderByClause.IsEmpty())
+                AddSorting(other.OrderByClause);
+
             other.Parameters.ForEach(Parameters.Add);
         }
 

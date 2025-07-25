@@ -4,6 +4,14 @@ using VManagement.Commons.Entities.Interfaces;
 
 namespace VManagement.Commons.Entities
 {
+    /// <summary>
+    /// Fornece métodos estáticos de fábrica para criar e inspecionar instâncias de entidades.
+    /// </summary>
+    /// <remarks>
+    /// Esta classe utiliza reflexão (reflection) para analisar os atributos das entidades,
+    /// permitindo a criação dinâmica de instâncias com a coleção de campos rastreáveis (<see cref="ITrackedFieldCollection"/>)
+    /// já inicializada. É uma peça fundamental para o funcionamento do padrão Active Record e do DAO.
+    /// </remarks>
     public class TableEntityFactory
     {
         /// <summary>

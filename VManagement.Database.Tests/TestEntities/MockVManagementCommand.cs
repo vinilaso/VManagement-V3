@@ -30,5 +30,20 @@ namespace VManagement.Database.Tests.TestEntities
             foreach (SqlParameter parameter in parameters)
                 _sqlCommand.Parameters.Add(parameter);
         }
+
+        public void ExecuteNonQuery()
+        {
+            throw new NotImplementedException();
+        }
+
+        public SqlDataReader ExecuteReader()
+        {
+            throw new NotImplementedException();
+        }
+
+        public TGeneric ExecuteScalar<TGeneric>()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
