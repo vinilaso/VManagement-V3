@@ -204,11 +204,6 @@ namespace VManagement.Database.DAO
                 propertyInfo.SetValue(entity, valueFromDb);
             }
 
-            foreach (ITrackedField trackedField in entity.TrackedFields)
-            {
-                trackedField.SetValue(trackedField.Value);
-            }
-
             return entity;
         }
     }

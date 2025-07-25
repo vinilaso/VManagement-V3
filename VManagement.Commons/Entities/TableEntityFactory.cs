@@ -21,15 +21,7 @@ namespace VManagement.Commons.Entities
         /// <returns>Uma nova instância de <typeparamref name="TEntity"/> com os campos rastreáveis configurados.</returns>
         public static TEntity CreateInstanceFor<TEntity>() where TEntity : ITableEntity, new()
         {
-            TrackedFieldCollection trackedFields = [];
-
-            foreach (string columnName in GetColumnNames<TEntity>())
-                trackedFields.Add(new TrackedField(columnName, null));
-
-            return new TEntity
-            {
-                TrackedFields = trackedFields
-            };
+            return new();
         }
 
         /// <summary>

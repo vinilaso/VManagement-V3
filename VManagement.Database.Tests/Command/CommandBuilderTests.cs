@@ -10,6 +10,15 @@ namespace VManagement.Database.Tests.Command
     [TestClass]
     public class CommandBuilderTests
     {
+        private MockTableEntityDAO<UsersTestEntity> _mockDao = new();
+
+        [TestInitialize]
+        public void Initialize()
+        {
+            _mockDao = new MockTableEntityDAO<UsersTestEntity>();
+            UsersTestEntity.ConfigureDAO(_mockDao);
+        }
+
         [TestMethod]
         public void BuildSelectCommand_WhenPopulateCommandObjectIsTrue_ShouldPopulateMockCommand()
         {
@@ -38,7 +47,7 @@ namespace VManagement.Database.Tests.Command
             Assert.AreEqual(1, mockCommand.Parameters.Count, "O comando deveria ter um parâmetro.");
             Assert.AreEqual(user.Id, mockCommand.Parameters[0].Value, "O valor do parâmetro no comando está incorreto.");
 
-            string expectedFullQuery = $"SELECT ID, NAME, BIRTHDATE FROM USERS_TEST V WHERE (V.ID = {mockCommand.Parameters[0].ParameterName})";
+            string expectedFullQuery = $"SELECT NAME, BIRTHDATE, ID FROM USERS_TEST V WHERE (V.ID = {mockCommand.Parameters[0].ParameterName})";
             Assert.AreEqual(expectedFullQuery, mockCommand.CommandText, "O CommandText populado no comando está incorreto.");
         }
 
@@ -81,7 +90,7 @@ namespace VManagement.Database.Tests.Command
             Assert.AreNotEqual(string.Empty, result.CommandText, "O CommandText não deveria estar vazio.");
             Assert.AreEqual(0, result.Restriction.Parameters.Count, "Não deveriam ter sido gerados parâmetros.");
 
-            string expectedFullQuery = "SELECT ID, NAME, BIRTHDATE FROM USERS_TEST V ";
+            string expectedFullQuery = "SELECT NAME, BIRTHDATE, ID FROM USERS_TEST V ";
 
             Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
         }
@@ -113,7 +122,7 @@ namespace VManagement.Database.Tests.Command
 
             Assert.AreEqual(NAME_PARAM_VALUE, parameter.Value, "O valor do parâmetro no comando está incorreto.");
 
-            string expectedFullQuery = $"SELECT ID, NAME, BIRTHDATE FROM USERS_TEST V WHERE ((UPPER(V.NAME) = {parameter.ParameterName})) ORDER BY V.ID DESC";
+            string expectedFullQuery = $"SELECT NAME, BIRTHDATE, ID FROM USERS_TEST V WHERE ((UPPER(V.NAME) = {parameter.ParameterName})) ORDER BY V.ID DESC";
             Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
         }
 
@@ -130,9 +139,12 @@ namespace VManagement.Database.Tests.Command
                 PopulateCommandObject = false
             };
 
-            UsersTestEntity user = TableEntityFactory.CreateInstanceFor<UsersTestEntity>();
-            user.Id = 1;
-            user.Name = "João";
+            _mockDao.EntityToReturnOnSelect = new();
+            _mockDao.EntityToReturnOnSelect.Id = 1;
+            _mockDao.EntityToReturnOnSelect.Name = "João";
+
+            UsersTestEntity user = UsersTestEntity.Find(Restriction.Empty);
+            user.Name = "João Miguel";
 
             CommandBuilder<UsersTestEntity> commandBuilder = new(options, entity: user);
             CommandBuilderResult result = commandBuilder.BuildUpdateCommand();

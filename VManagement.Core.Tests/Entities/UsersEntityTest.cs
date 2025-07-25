@@ -36,30 +36,11 @@ namespace VManagement.Core.Tests.Entities
     [TableEntity("USERS_TEST")]
     internal class UsersTestEntity : TableEntity<UsersTestEntity>
     {
-        private string? _name;
-        private DateTime? _birthdate;
-
         [EntityColumnName("NAME")]
-        public string? Name
-        {
-            get => _name;
-            set
-            {
-                _name = value;
-                TrackedFields["NAME"].ChangeValue(value);
-            }
-        }
+        public string? Name { get; set; }
 
         [EntityColumnName("BIRTHDATE")]
-        public DateTime? BirthDate
-        {
-            get => _birthdate;
-            set
-            {
-                _birthdate = value;
-                TrackedFields["BIRTHDATE"].ChangeValue(value);
-            }
-        }
+        public DateTime? BirthDate { get; set; }
 
         private HookType _expectedHooks = HookType.None;
         private HookType _calledHooks = HookType.None;

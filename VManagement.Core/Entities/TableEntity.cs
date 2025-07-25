@@ -46,7 +46,8 @@ namespace VManagement.Core.Entities
     public abstract partial class TableEntity<TEntity> : ITableEntity where TEntity : TableEntity<TEntity>, new()
     {
         private long? _id;
-        
+        private ITableEntity _originalInstance;
+
         /// <summary>
         /// Representa o estado da entidade durante seu ciclo de vida.
         /// </summary>
@@ -54,17 +55,21 @@ namespace VManagement.Core.Entities
 
         /// <inheritdoc/>
         [EntityColumnName("ID")]
-        public long? Id
+        public long? Id { get; set; }
+
+        public ITableEntity GetOriginalInstance()
         {
-            get => _id;
-            set
-            {
-                _id = value;
-                TrackedFields["ID"].ChangeValue(value);
-            }
+            return _originalInstance;
         }
 
-        /// <inheritdoc/>
-        public ITrackedFieldCollection TrackedFields { get; set; } = new TrackedFieldCollection();
+        public void AcceptChanges()
+        {
+            SetOriginalInstance((TEntity)MemberwiseClone());
+        }
+
+        public void SetOriginalInstance(ITableEntity entity)
+        {
+            _originalInstance = entity;
+        }
     }
 }

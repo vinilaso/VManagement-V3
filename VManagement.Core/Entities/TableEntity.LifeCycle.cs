@@ -102,6 +102,8 @@ namespace VManagement.Core.Entities
         /// </summary>
         protected void OnAfterCreated()
         {
+            SetOriginalInstance((TEntity)MemberwiseClone());
+
             UpdateEntityState(EntityState.New);
 
             OnAfterCreatedCore();
@@ -138,8 +140,6 @@ namespace VManagement.Core.Entities
         {
             UpdateEntityState(EntityState.Loaded);
 
-            UpdateTrackedFields();
-
             OnAfterInsertCore();
         }
 
@@ -168,6 +168,8 @@ namespace VManagement.Core.Entities
         /// </summary>
         protected void OnAfterSave()
         {
+            AcceptChanges();
+
             OnAfterSaveCore();
         }
 
@@ -177,8 +179,6 @@ namespace VManagement.Core.Entities
         protected void OnAfterUpdate()
         {
             UpdateEntityState(EntityState.Loaded);
-
-            UpdateTrackedFields();
 
             OnAfterUpdateCore();
         }
@@ -208,6 +208,8 @@ namespace VManagement.Core.Entities
         /// </summary>
         protected void OnAfterGet()
         {
+            SetOriginalInstance((TEntity)MemberwiseClone());
+
             UpdateEntityState(EntityState.Loaded);
 
             OnAfterGetCore();
@@ -280,17 +282,6 @@ namespace VManagement.Core.Entities
         #endregion >> Core hooks
 
         #region >> Private methods
-
-        private void UpdateTrackedFields()
-        {
-            foreach (var prop in TableEntityHelper<TEntity>.GetColumnProperties())
-            {
-                if (prop.GetCustomAttribute<EntityColumnNameAttribute>() is not EntityColumnNameAttribute attribute)
-                    continue;
-
-                TrackedFields[attribute.ColumnName].SetValue(prop.GetValue((TEntity)this));
-            }
-        }
 
         private void ValidateEntityState(string action, params EntityState[] expectedStates)
         {

@@ -85,7 +85,7 @@ namespace VManagement.Database.Command
                     if (attribute.ColumnName == "ID")
                         continue;
 
-                    if (_entity is not null && !_entity.TrackedFields[attribute.ColumnName].Changed)
+                    if (_entity is not null && !property.IsChanged(_entity))
                         continue;
 
                     string
