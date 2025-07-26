@@ -45,7 +45,6 @@ namespace VManagement.Core.Entities
     /// <typeparam name="TEntity">O tipo concreto da entidade que está herdando desta classe (ex: 'public class User : TableEntity&lt;User&gt;').</typeparam>
     public abstract partial class TableEntity<TEntity> : ITableEntity where TEntity : TableEntity<TEntity>, new()
     {
-        private long? _id;
         private ITableEntity? _originalInstance;
 
         /// <summary>
