@@ -1,4 +1,5 @@
 ﻿using Microsoft.Data.SqlClient;
+using System.Data;
 using System.Reflection;
 using VManagement.Commons.Entities;
 using VManagement.Commons.Entities.Attributes;
@@ -186,6 +187,29 @@ namespace VManagement.Database.DAO
                 yield return TEntityFromDataReader(reader);
         }
 
+        /// <summary>
+        /// Verifica se existem tuplas no banco de dados que atendem à restrição informada.
+        /// </summary>
+        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
+        /// <returns><see langword="true"/>, caso ao menos um registro seja encontrado. Caso contrário, <see langword="false"/>.</returns>
+        public bool Exists(Restriction restriction)
+        {
+            using IVManagementConnection connection = _connectionFactory.CreateConnection();
+            IVManagementCommand command = connection.CreateCommand();
+
+            CommandBuilderOptions options = new()
+            {
+                AppendExistingRestriction = true,
+                PopulateCommandObject = true,
+                AutoGenerateRestriction = false
+            };
+
+            CommandBuilder<TEntity> commandBuilder = new(options, preRestriction: restriction, command: command);
+            commandBuilder.BuildExistsCommand();
+
+            return command.ExecuteScalar<int>() > 0;
+        }
+
         private TEntity TEntityFromDataReader(SqlDataReader reader)
         {
             TEntity entity = TableEntityFactory.CreateInstanceFor<TEntity>();
@@ -193,18 +217,24 @@ namespace VManagement.Database.DAO
             foreach (PropertyInfo propertyInfo in _properties)
             {
                 EntityColumnNameAttribute columnAttribute = propertyInfo.GetCustomAttribute<EntityColumnNameAttribute>()!;
-                string columnName = columnAttribute.ColumnName;
-
-                object? valueFromDb = reader[columnName];
-                if (valueFromDb == DBNull.Value)
-                {
-                    valueFromDb = null;
-                }
+                
+                object? valueFromDb = GetValueFromReader(propertyInfo.PropertyType, reader, columnAttribute.ColumnName);
 
                 propertyInfo.SetValue(entity, valueFromDb);
             }
 
             return entity;
+        }
+
+        private object? GetValueFromReader(Type propertyType, SqlDataReader reader, string columnName)
+        {
+            if (reader[columnName] == DBNull.Value)
+                return null;
+
+            if (propertyType == typeof(bool?))
+                return reader.GetBoolean(columnName);
+
+            return reader[columnName];
         }
     }
 }

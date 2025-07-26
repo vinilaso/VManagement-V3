@@ -154,6 +154,25 @@ namespace VManagement.Database.Command
             return new CommandBuilderResult(commandText, restriction);
         }
 
+        /// <summary>
+        /// Constrói um comando SQL otimizado para verificar a existência de um registro.
+        /// </summary>
+        /// <remarks>
+        /// Este método gera uma consulta <c>SELECT CASE WHEN EXISTS(...)</c>, que é uma forma altamente eficiente
+        /// de verificar se pelo menos um registro que atende à restrição existe no banco de dados,
+        /// sem a necessidade de carregar dados da tabela. O resultado é um único valor (1 para 'existe' ou 0 para 'não existe').
+        /// </remarks>
+        /// <returns>Uma instância de <see cref="CommandBuilderResult"/> contendo o texto do comando SQL de existência e os parâmetros da restrição.</returns>
+        internal CommandBuilderResult BuildExistsCommand()
+        {
+            Restriction restriction = CreateRestriction(withAlias: true);
+            string commandText = $"SELECT CASE WHEN EXISTS(SELECT V.ID FROM {TableName} {_options.MainTableAlias} {restriction}) THEN 1 ELSE 0 END";
+
+            PopulateCommand(commandText, restriction);
+
+            return new CommandBuilderResult(commandText, restriction);
+        }
+
         private Restriction CreateRestriction(bool withAlias = true)
         {
             Restriction restriction = Restriction.Empty;

@@ -222,5 +222,36 @@ namespace VManagement.Database.Tests.Command
             string expectedFullQuery = $"DELETE FROM USERS_TEST WHERE (ID = {idParameter.ParameterName})";
             Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
         }
+
+        [TestMethod]
+        public void BuildExistsCommand_ShouldCreateCorrectParams()
+        {
+            CommandBuilderOptions options = new()
+            {
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = false,
+                AppendExistingRestriction = true
+            };
+
+            Restriction restriction = new("V.ID = @pID AND UPPER(V.NAME) LIKE @pNAME");
+            restriction.Parameters.Add("pID", 1);
+            restriction.Parameters.Add("pNAME", "SILVA");
+
+            CommandBuilder<UsersTestEntity> builder = new(options, preRestriction: restriction);
+            CommandBuilderResult result = builder.BuildExistsCommand();
+
+            Assert.AreNotEqual(string.Empty, result.CommandText, "O CommandText gerado não deveria ser vazio.");
+            Assert.AreEqual(2, result.Restriction.Parameters.Count, "O número de parâmetros gerados está incorreto.");
+
+            SqlParameter
+                idParameter = result.Restriction.Parameters[0],
+                nameParameter = result.Restriction.Parameters[1];
+
+            Assert.AreEqual(1, idParameter.Value, "O valor do parâmetro para ID está incorreto.");
+            Assert.AreEqual("SILVA", nameParameter.Value, "O valor do parâmetro para NAME está incorreto.");
+
+            string expectedFullQuery = $"SELECT CASE WHEN EXISTS(SELECT V.ID FROM USERS_TEST V WHERE ((V.ID = @pID AND UPPER(V.NAME) LIKE @pNAME))) THEN 1 ELSE 0 END";
+            Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
+        }
     }
 }

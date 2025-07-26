@@ -55,5 +55,12 @@ namespace VManagement.Database.Generalization
         /// </summary>
         /// <param name="entity">A entidade a ser excluída.</param>
         void Delete(TEntity entity);
+
+        /// <summary>
+        /// Verifica se existem tuplas no banco de dados que atendem à restrição informada.
+        /// </summary>
+        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
+        /// <returns><see langword="true"/>, caso ao menos um registro seja encontrado. Caso contrário, <see langword="false"/>.</returns>
+        bool Exists(Restriction restriction);
     }
 }

@@ -31,6 +31,30 @@ namespace VManagement.Core.Entities
         }
 
         /// <summary>
+        /// Verifica de forma otimizada se pelo menos um registro que atende à restrição existe no banco de dados.
+        /// </summary>
+        /// <remarks>
+        /// Este método é mais performático do que 'FindFirstOrDefault' para cenários onde você só precisa saber
+        /// se um registro existe, pois se traduz em uma consulta mais leve (`SELECT 1`).
+        /// </remarks>
+        /// <param name="restriction">A restrição utilizada para a busca.</param>
+        /// <returns><c>true</c> se pelo menos um registro for encontrado; caso contrário, <c>false</c>.</returns>
+        public static bool Exists(Restriction restriction)
+        {
+            return _dao.Exists(restriction);
+        }
+
+        /// <summary>
+        /// Verifica de forma otimizada se um registro com o ID especificado existe no banco de dados.
+        /// </summary>
+        /// <param name="id">O ID da entidade a ser verificada.</param>
+        /// <returns><c>true</c> se um registro com o ID especificado for encontrado; caso contrário, <c>false</c>.</returns>
+        public static bool Exists(long? id)
+        {
+            return Exists(Restriction.FromId(id));
+        }
+
+        /// <summary>
         /// Procura o primeiro registro do banco de dados que atende à restrição informada. Caso não encontre, lança uma exceção.
         /// </summary>
         /// <param name="restriction">A restrição utilizada para a busca.</param>
