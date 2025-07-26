@@ -1,6 +1,6 @@
-﻿using VManagement.Commons.Entities;
-using VManagement.Commons.Entities.Attributes;
+﻿using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
+using VManagement.Core.Exceptions;
 
 namespace VManagement.Core.Entities
 {
@@ -46,7 +46,7 @@ namespace VManagement.Core.Entities
     public abstract partial class TableEntity<TEntity> : ITableEntity where TEntity : TableEntity<TEntity>, new()
     {
         private long? _id;
-        private ITableEntity _originalInstance;
+        private ITableEntity? _originalInstance;
 
         /// <summary>
         /// Representa o estado da entidade durante seu ciclo de vida.
@@ -57,16 +57,29 @@ namespace VManagement.Core.Entities
         [EntityColumnName("ID")]
         public long? Id { get; set; }
 
+        /// <inheritdoc/>
         public ITableEntity GetOriginalInstance()
         {
+            if (_originalInstance == null)
+                throw new OriginalEntityNotSetException();
+
             return _originalInstance;
         }
 
+        /// <inheritdoc/>
         public void AcceptChanges()
         {
             SetOriginalInstance((TEntity)MemberwiseClone());
         }
 
+        /// <summary>
+        /// Define a instância "snapshot" que representa o estado original da entidade.
+        /// </summary>
+        /// <remarks>
+        /// Este método é usado internamente pelo ORM após carregar uma entidade do banco de dados
+        /// para armazenar seu estado inicial.
+        /// </remarks>
+        /// <param name="entity">A instância que servirá como o estado original.</param>
         public void SetOriginalInstance(ITableEntity entity)
         {
             _originalInstance = entity;

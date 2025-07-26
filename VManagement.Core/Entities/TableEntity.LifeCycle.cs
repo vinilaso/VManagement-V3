@@ -1,7 +1,4 @@
-﻿using VManagement.Commons.Entities.Attributes;
-using VManagement.Commons.Entities;
-using System.Reflection;
-using VManagement.Core.Exceptions;
+﻿using VManagement.Core.Exceptions;
 using VManagement.Commons.Utility.Extensions;
 
 namespace VManagement.Core.Entities

@@ -8,17 +8,20 @@ namespace VManagement.Commons.Entities
     /// Fornece métodos estáticos de fábrica para criar e inspecionar instâncias de entidades.
     /// </summary>
     /// <remarks>
-    /// Esta classe utiliza reflexão (reflection) para analisar os atributos das entidades,
-    /// permitindo a criação dinâmica de instâncias com a coleção de campos rastreáveis (<see cref="ITrackedFieldCollection"/>)
-    /// já inicializada. É uma peça fundamental para o funcionamento do padrão Active Record e do DAO.
+    /// Esta classe utiliza reflexão (reflection) para analisar os atributos das entidades
+    /// e extrair metadados, como os nomes das colunas mapeadas.
     /// </remarks>
     public class TableEntityFactory
     {
         /// <summary>
-        /// Cria uma nova instância de uma entidade e inicializa sua coleção de campos rastreáveis.
+        /// Cria uma nova instância de uma entidade.
         /// </summary>
-        /// <typeparam name="TEntity">O tipo da entidade a ser criada, que deve implementar <see cref="ITableEntity"/>.</typeparam>
-        /// <returns>Uma nova instância de <typeparamref name="TEntity"/> com os campos rastreáveis configurados.</returns>
+        /// <remarks>
+        /// Este método simplesmente invoca o construtor sem parâmetros da entidade.
+        /// A inicialização de coleções internas, como a de campos rastreáveis, é de responsabilidade da própria entidade.
+        /// </remarks>
+        /// <typeparam name="TEntity">O tipo da entidade a ser criada, que deve implementar <see cref="ITableEntity"/> e ter um construtor sem parâmetros.</typeparam>
+        /// <returns>Uma nova instância de <typeparamref name="TEntity"/>.</returns>
         public static TEntity CreateInstanceFor<TEntity>() where TEntity : ITableEntity, new()
         {
             return new();
