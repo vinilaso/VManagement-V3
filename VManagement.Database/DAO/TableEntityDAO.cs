@@ -6,6 +6,7 @@ using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 using VManagement.Database.Clauses;
 using VManagement.Database.Command;
+using VManagement.Database.Connection;
 using VManagement.Database.Generalization;
 
 namespace VManagement.Database.DAO
@@ -20,7 +21,7 @@ namespace VManagement.Database.DAO
     /// facilitando os testes unitários através da injeção de dependência.
     /// </remarks>
     /// <typeparam name="TEntity">O tipo da entidade para a qual este DAO irá gerenciar a persistência.</typeparam>
-    public class TableEntityDAO<TEntity> : ITableEntityDAO<TEntity> where TEntity : ITableEntity, new()
+    public class TableEntityDAO<TEntity> : ITableEntityDAO<TEntity> where TEntity : class, ITableEntity, new()
     {
         private readonly IEnumerable<PropertyInfo> _properties;
         private readonly IConnectionFactory _connectionFactory;

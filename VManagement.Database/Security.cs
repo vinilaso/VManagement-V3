@@ -34,7 +34,7 @@ namespace VManagement.Database
         /// </summary>
         /// <param name="path">O caminho do arquivo de configurações.</param>
         /// <exception cref="FileNotFoundException">Lançada quando o caminho informado é inválido.</exception>
-        internal static void SetConfigurationStringFilePath(string path)
+        internal static void SetConfigurationFilePath(string path)
         {
             if (!File.Exists(path))
                 throw new FileNotFoundException($"The file {path} does not exist or is not accessible.");
