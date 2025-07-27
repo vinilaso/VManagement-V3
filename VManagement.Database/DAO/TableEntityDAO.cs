@@ -6,6 +6,7 @@ using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 using VManagement.Database.Clauses;
 using VManagement.Database.Command;
+using VManagement.Database.Connection;
 using VManagement.Database.Generalization;
 
 namespace VManagement.Database.DAO
