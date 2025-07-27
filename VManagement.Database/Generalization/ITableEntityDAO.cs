@@ -13,7 +13,7 @@ namespace VManagement.Database.Generalization
     /// interaja com o banco de dados de forma desacoplada e testável.
     /// </remarks>
     /// <typeparam name="TEntity">O tipo da entidade para a qual este DAO gerenciará a persistência.</typeparam>
-    public interface ITableEntityDAO<TEntity> where TEntity : ITableEntity, new()
+    public interface ITableEntityDAO<TEntity> where TEntity : class, ITableEntity, new()
     {
         /// <summary>
         /// Insere uma nova entidade no banco de dados.

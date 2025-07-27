@@ -4,13 +4,14 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <BaseOutputPath>C:\VManagementV3\Bin</BaseOutputPath>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>  
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Castle.Core" Version="5.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VManagement.Core\VManagement.Core.csproj" />
   </ItemGroup>
 
 </Project>

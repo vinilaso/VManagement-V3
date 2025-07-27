@@ -48,5 +48,10 @@ namespace VManagement.Database.Tests.TestEntities
             UpdateCallCount++;
             LastUpdatedEntity = entity;
         }
+
+        public bool Exists(Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

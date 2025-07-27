@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VManagement.Proxy", "..\VManagement.Proxy\VManagement.Proxy.csproj", "{CCF738A2-7AEC-4E75-B554-7370FD9DE49F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{93E15734-D6C0-4A86-9A0F-2FC5B753E0B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{93E15734-D6C0-4A86-9A0F-2FC5B753E0B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{93E15734-D6C0-4A86-9A0F-2FC5B753E0B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CCF738A2-7AEC-4E75-B554-7370FD9DE49F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CCF738A2-7AEC-4E75-B554-7370FD9DE49F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CCF738A2-7AEC-4E75-B554-7370FD9DE49F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CCF738A2-7AEC-4E75-B554-7370FD9DE49F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

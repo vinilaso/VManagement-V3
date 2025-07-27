@@ -48,5 +48,10 @@ namespace VManagement.Core.Tests.DAO
             UpdateCallCount++;
             LastUpdatedEntity = entity;
         }
+
+        public bool Exists(Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

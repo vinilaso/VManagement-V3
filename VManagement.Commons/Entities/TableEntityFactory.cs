@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Castle.DynamicProxy;
 using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 
@@ -13,6 +14,9 @@ namespace VManagement.Commons.Entities
     /// </remarks>
     public class TableEntityFactory
     {
+        private readonly static ProxyGenerator _generator = new();
+        private readonly static List<IInterceptor> _interceptors = [];
+
         /// <summary>
         /// Cria uma nova instância de uma entidade.
         /// </summary>
@@ -22,9 +26,14 @@ namespace VManagement.Commons.Entities
         /// </remarks>
         /// <typeparam name="TEntity">O tipo da entidade a ser criada, que deve implementar <see cref="ITableEntity"/> e ter um construtor sem parâmetros.</typeparam>
         /// <returns>Uma nova instância de <typeparamref name="TEntity"/>.</returns>
-        public static TEntity CreateInstanceFor<TEntity>() where TEntity : ITableEntity, new()
+        public static TEntity CreateInstanceFor<TEntity>() where TEntity : class, ITableEntity, new()
         {
-            return new();
+            return _generator.CreateClassProxy<TEntity>([.._interceptors]);
+        }
+
+        public static void UseInterceptor(IInterceptor interceptor)
+        {
+            _interceptors.Add(interceptor);
         }
 
         /// <summary>
