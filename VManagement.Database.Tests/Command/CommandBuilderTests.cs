@@ -253,5 +253,23 @@ namespace VManagement.Database.Tests.Command
             string expectedFullQuery = $"SELECT CASE WHEN EXISTS(SELECT V.ID FROM USERS_TEST V WHERE ((V.ID = @pID AND UPPER(V.NAME) LIKE @pNAME))) THEN 1 ELSE 0 END";
             Assert.AreEqual(expectedFullQuery, result.CommandText, "O CommandText gerado está incorreto.");
         }
+
+        [TestMethod]
+        public void BuildSelectCommand_WhenFetchPredefinedColumnsIsTrue_ShouldAppendPredefinedColumnsOnly()
+        {
+            CommandBuilderOptions options = new()
+            {
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = false,
+                AppendExistingRestriction = false,
+                FetchPredefinedColumns = true
+            };
+
+            CommandBuilder<UsersTestEntity> builder = new(options, predefinedSelectColumns: ["NAME"]);
+            CommandBuilderResult result = builder.BuildSelectCommand();
+
+            string expectedFullQuery = "SELECT NAME FROM USERS_TEST V ";
+            Assert.AreEqual(expectedFullQuery, result.CommandText);
+        }
     }
 }

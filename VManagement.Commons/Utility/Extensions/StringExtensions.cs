@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using VManagement.Commons.Utility.Enums;
 
 namespace VManagement.Commons.Utility.Extensions
 {
@@ -49,6 +50,34 @@ namespace VManagement.Commons.Utility.Extensions
                                   .Max();
 
             return maxIndex + 1;
+        }
+
+        public static string WithSqlAlias(this string value, string alias = "V")
+        {
+            if (!alias.EndsWith('.'))
+                alias += '.';
+
+            return alias + value;
+        }
+
+        public static bool Equals(this string? value, string other, Collations collation)
+        {
+            throw new NotImplementedException("Este método é utilizado apenas para tradução de expressões LINQ para SQL. Para comparação de strings, utilize String.Equals().");
+        }
+
+        public static bool Contains(this string? value, string other, Collations collation)
+        {
+            throw new NotImplementedException("Este método é utilizado apenas para tradução de expressões LINQ para SQL. Utilize String.Contains().");
+        }
+
+        public static bool StartsWith(this string? value, string other, Collations collation)
+        {
+            throw new NotImplementedException("Este método é utilizado apenas para tradução de expressões LINQ para SQL. Utilize String.StartsWith().");
+        }
+
+        public static bool EndsWith(this string? value, string other, Collations collation)
+        {
+            throw new NotImplementedException("Este método é utilizado apenas para tradução de expressões LINQ para SQL. Utilize String.EndsWith().");
         }
     }
 }

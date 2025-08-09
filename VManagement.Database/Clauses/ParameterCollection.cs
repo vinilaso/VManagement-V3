@@ -26,5 +26,19 @@ namespace VManagement.Database.Clauses
             else
                 Add(new SqlParameter($"@{parameterName}", parameterValue));
         }
+
+        /// <summary>
+        /// Retorna uma representação em string de todos os parâmetros na coleção, mostrando seus nomes e valores.
+        /// </summary>
+        /// <returns>Uma string formatada com os parâmetros. Ex: "@pID=1, @pNAME=João".</returns>
+        public override string ToString()
+        {
+            if (Count == 0)
+            {
+                return "Nenhum parâmetro.";
+            }
+
+            return string.Join(Environment.NewLine, this.Select(p => $"{p.ParameterName} = {p.Value}"));
+        }
     }
 }

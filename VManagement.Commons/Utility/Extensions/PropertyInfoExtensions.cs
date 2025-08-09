@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 
 namespace VManagement.Commons.Utility.Extensions
@@ -14,6 +15,14 @@ namespace VManagement.Commons.Utility.Extensions
                 originalValue = property.GetValue(currentInstance.GetOriginalInstance());
 
             return !currentValue?.Equals(originalValue) ?? false;
+        }
+
+        public static string GetEntityColumnName(this PropertyInfo property)
+        {
+            if (property.GetCustomAttribute<EntityColumnNameAttribute>() is not EntityColumnNameAttribute attr)
+                return string.Empty;
+
+            return attr.ColumnName;
         }
     }
 }
