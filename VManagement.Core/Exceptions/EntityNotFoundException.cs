@@ -1,4 +1,5 @@
-﻿using VManagement.Database.Clauses;
+﻿using System.Linq.Expressions;
+using VManagement.Database.Clauses;
 
 namespace VManagement.Core.Exceptions
 {
@@ -24,6 +25,15 @@ namespace VManagement.Core.Exceptions
         /// </summary>
         /// <param name="restriction">A restrição que foi utilizada na busca e não retornou resultados.</param>
         public EntityNotFoundException(Restriction restriction) : base($"Não foi encontrada entidade com a restrição informada. {restriction}")
+        {
+        }
+
+        /// <summary>
+        /// Inicia uma nova instância da classe <see cref="EntityNotFoundException"/> com uma mensagem de erro detalhada,
+        /// incluindo a restrição de busca utilizada.
+        /// </summary>
+        /// <param name="predicate">A restrição que foi utilizada na busca e não retornou resultados.</param>
+        public EntityNotFoundException(Expression predicate) : base($"Não foi encontrada entidade com o predicado informado. {predicate}")
         {
         }
     }

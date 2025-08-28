@@ -1,13 +1,15 @@
 ﻿using Microsoft.Data.SqlClient;
 using System.Data;
+using System.Linq.Expressions;
 using System.Reflection;
 using VManagement.Commons.Entities;
 using VManagement.Commons.Entities.Attributes;
 using VManagement.Commons.Entities.Interfaces;
 using VManagement.Database.Clauses;
 using VManagement.Database.Command;
-using VManagement.Database.Connection;
 using VManagement.Database.Generalization;
+using VManagement.Database.Linq;
+using VManagement.Database.Linq.SqlServer;
 
 namespace VManagement.Database.DAO
 {
@@ -36,11 +38,7 @@ namespace VManagement.Database.DAO
             _connectionFactory = connectionFactory;
         }
 
-        /// <summary>
-        /// Insere uma nova entidade no banco de dados.
-        /// </summary>
-        /// <param name="entity">A instância da entidade a ser inserida.</param>
-        /// <returns>O ID (chave primária) do novo registro inserido.</returns>
+        /// <inheritdoc/>
         public long Insert(TEntity entity)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -59,11 +57,7 @@ namespace VManagement.Database.DAO
             return command.ExecuteScalar<long>();
         }
 
-        /// <summary>
-        /// Busca a primeira entidade no banco de dados que corresponde à restrição fornecida.
-        /// </summary>
-        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
-        /// <returns>Uma instância de <typeparamref name="TEntity"/> se um registro for encontrado; caso contrário, <see langword="null"/>.</returns>
+        /// <inheritdoc/>
         public TEntity? Select(Restriction restriction)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -87,11 +81,55 @@ namespace VManagement.Database.DAO
             return default;
         }
 
-        /// <summary>
-        /// Busca todas as entidades que correspondem à restrição e as retorna em uma coleção carregada em memória.
-        /// </summary>
-        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
-        /// <returns>Uma instância de <see cref="TableEntityCollection{TEntity}"/> contendo todas as entidades encontradas.</returns>
+        /// <inheritdoc/>
+        public TSelector? Select<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            SelectPropertiesExpressionVisitor visitor = new();
+            visitor.Visit(selector);
+
+            using IVManagementConnection connection = _connectionFactory.CreateConnection();
+            IVManagementCommand command = connection.CreateCommand();
+
+            CommandBuilderOptions options = new()
+            {
+                AppendExistingRestriction = true,
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = true,
+                FetchPredefinedColumns = true
+            };
+
+            CommandBuilder<TEntity> commandBuilder = new(options, preRestriction: restriction, command: command, predefinedSelectColumns: visitor.ColumnNames);
+            commandBuilder.BuildSelectCommand();
+
+            using SqlDataReader reader = command.ExecuteReader();
+
+            if (!reader.Read())
+                return default;
+
+            var construct = selector.Compile();
+            
+            return construct(TEntityPOCOFromDataReader(reader, visitor.Properties));
+        }
+
+        /// <inheritdoc/>
+        public TEntity? Select(Expression<Func<TEntity, bool>> predicate)
+        {
+            SqlServerVisitor visitor = new();
+            Restriction restritction = visitor.Translate(predicate);
+
+            return Select(restritction);
+        }
+
+        /// <inheritdoc/>
+        public TSelector? Select<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
+        {
+            SqlServerVisitor visitor = new();
+            Restriction restritction = visitor.Translate(predicate);
+
+            return Select(selector, restritction);
+        }
+
+        /// <inheritdoc/>
         public TableEntityCollection<TEntity> SelectMany(Restriction restriction)
         {
             TableEntityCollection<TEntity> collection = new();
@@ -117,10 +155,38 @@ namespace VManagement.Database.DAO
             return collection;
         }
 
-        /// <summary>
-        /// Atualiza um registro existente no banco de dados com base nos dados da entidade fornecida.
-        /// </summary>
-        /// <param name="entity">A entidade contendo os dados a serem atualizados. O ID da entidade é usado para identificar o registro.</param>
+        /// <inheritdoc/>
+        public IEnumerable<TSelector> SelectMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            List<TSelector> result = [];
+
+            SelectPropertiesExpressionVisitor visitor = new();
+            visitor.Visit(selector);
+
+            using IVManagementConnection connection = _connectionFactory.CreateConnection();
+            IVManagementCommand command = connection.CreateCommand();
+
+            CommandBuilderOptions options = new()
+            {
+                AppendExistingRestriction = true,
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = true,
+                FetchPredefinedColumns = true
+            };
+
+            CommandBuilder<TEntity> commandBuilder = new(options, preRestriction: restriction, command: command, predefinedSelectColumns: visitor.ColumnNames);
+            commandBuilder.BuildSelectCommand();
+
+            using SqlDataReader reader = command.ExecuteReader();
+            var construct = selector.Compile();
+
+            while (reader.Read())
+                result.Add(construct(TEntityPOCOFromDataReader(reader, visitor.Properties)));
+            
+            return result;
+        }
+
+        /// <inheritdoc/>
         public void Update(TEntity entity)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -139,10 +205,7 @@ namespace VManagement.Database.DAO
             command.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Exclui um registro do banco de dados com base no ID da entidade fornecida.
-        /// </summary>
-        /// <param name="entity">A entidade a ser excluída.</param>
+        /// <inheritdoc/>
         public void Delete(TEntity entity)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -161,12 +224,7 @@ namespace VManagement.Database.DAO
             command.ExecuteNonQuery();
         }
 
-        /// <summary>
-        /// Busca entidades que correspondem à restrição usando execução adiada (deferred execution).
-        /// Ideal para processar grandes volumes de dados com baixo consumo de memória.
-        /// </summary>
-        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
-        /// <returns>Um <see cref="IEnumerable{TEntity}"/> que produz entidades uma a uma conforme são lidas do banco.</returns>
+        /// <inheritdoc/>
         public IEnumerable<TEntity> FetchMany(Restriction restriction)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -188,11 +246,63 @@ namespace VManagement.Database.DAO
                 yield return TEntityFromDataReader(reader);
         }
 
-        /// <summary>
-        /// Verifica se existem tuplas no banco de dados que atendem à restrição informada.
-        /// </summary>
-        /// <param name="restriction">Os critérios (cláusula WHERE e ORDER BY) para a busca.</param>
-        /// <returns><see langword="true"/>, caso ao menos um registro seja encontrado. Caso contrário, <see langword="false"/>.</returns>
+        /// <inheritdoc/>
+        public IEnumerable<TSelector> FetchMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            SelectPropertiesExpressionVisitor visitor = new();
+            visitor.Visit(selector);
+
+            using IVManagementConnection connection = _connectionFactory.CreateConnection();
+            IVManagementCommand command = connection.CreateCommand();
+
+            CommandBuilderOptions options = new()
+            {
+                AppendExistingRestriction = true,
+                AutoGenerateRestriction = false,
+                PopulateCommandObject = true,
+                FetchPredefinedColumns = true
+            };
+
+            CommandBuilder<TEntity> commandBuilder = new(options, preRestriction: restriction, command: command, predefinedSelectColumns: visitor.ColumnNames);
+            commandBuilder.BuildSelectCommand();
+
+            using SqlDataReader reader = command.ExecuteReader();
+            var construct = selector.Compile();
+
+            while (reader.Read())
+                yield return construct(TEntityPOCOFromDataReader(reader, visitor.Properties));
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<TSelector> SelectMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
+        {
+            SqlServerVisitor visitor = new();
+            Restriction restritction = visitor.Translate(predicate);
+
+            return SelectMany(selector, restritction);
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<TEntity> FetchMany(Expression<Func<TEntity, bool>> predicate)
+        {
+            SqlServerVisitor visitor = new();
+            Restriction restritction = visitor.Translate(predicate);
+
+            foreach (TEntity entity in FetchMany(restritction))
+                yield return entity;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<TSelector> FetchMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
+        {
+            SqlServerVisitor visitor = new();
+            Restriction restritction = visitor.Translate(predicate);
+
+            foreach (TSelector projection in FetchMany(selector, restritction))
+                yield return projection;
+        }
+
+        /// <inheritdoc/>
         public bool Exists(Restriction restriction)
         {
             using IVManagementConnection connection = _connectionFactory.CreateConnection();
@@ -227,7 +337,23 @@ namespace VManagement.Database.DAO
             return entity;
         }
 
-        private object? GetValueFromReader(Type propertyType, SqlDataReader reader, string columnName)
+        private static TEntity TEntityPOCOFromDataReader(SqlDataReader reader, IEnumerable<PropertyInfo> properties)
+        {
+            TEntity entity = new();
+
+            foreach (PropertyInfo propertyInfo in properties)
+            {
+                EntityColumnNameAttribute columnAttribute = propertyInfo.GetCustomAttribute<EntityColumnNameAttribute>()!;
+
+                object? valueFromDb = GetValueFromReader(propertyInfo.PropertyType, reader, columnAttribute.ColumnName);
+
+                propertyInfo.SetValue(entity, valueFromDb);
+            }
+
+            return entity;
+        }
+
+        private static object? GetValueFromReader(Type propertyType, SqlDataReader reader, string columnName)
         {
             if (reader[columnName] == DBNull.Value)
                 return null;

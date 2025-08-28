@@ -24,6 +24,7 @@ namespace VManagement.Database.Command
         private readonly Restriction? _preRestriction;
         private readonly IVManagementCommand? _command;
         private readonly CommandBuilderOptions _options;
+        private readonly IEnumerable<string>? _predefinedSelectColumns;
 
         /// <summary>
         /// O nome da tabela do banco de dados na qual o comando será construído.
@@ -39,7 +40,7 @@ namespace VManagement.Database.Command
         /// <param name="preRestriction">Uma restrição pré-definida a ser adicionada às restrições geradas.</param>
         /// <param name="command">O comando a ser populado com o texto e os parâmetros gerados, caso a opção 'PopulateCommandObject' seja verdadeira.</param>
         /// <exception cref="NotTableEntityException">Lançada caso <typeparamref name="TTableEntity"/> não possua o atributo <see cref="TableEntityAttribute"/>.</exception>
-        internal CommandBuilder(CommandBuilderOptions options, TTableEntity? entity = default, Restriction? preRestriction = null, IVManagementCommand? command = null)
+        internal CommandBuilder(CommandBuilderOptions options, TTableEntity? entity = default, Restriction? preRestriction = null, IVManagementCommand? command = null, IEnumerable<string>? predefinedSelectColumns = null)
         {
             ValidateGenericParam();
             TableName = TableEntityHelper<TTableEntity>.GetTableName();
@@ -47,6 +48,7 @@ namespace VManagement.Database.Command
             _entity = entity;
             _preRestriction = preRestriction;
             _command = command;
+            _predefinedSelectColumns = predefinedSelectColumns;
         }
 
         /// <summary>
@@ -58,9 +60,8 @@ namespace VManagement.Database.Command
             DelimitedStringBuilder fieldsBuilder = new(", ");
             Restriction restriction = CreateRestriction();
 
-            foreach (PropertyInfo property in TableEntityHelper<TTableEntity>.GetColumnProperties())
-                if (property.GetCustomAttribute<EntityColumnNameAttribute>() is EntityColumnNameAttribute attribute)
-                    fieldsBuilder.Append(attribute.ColumnName);
+            foreach (string columnName in GetSelectColumns())
+                fieldsBuilder.Append(columnName);
 
             string commandText = $"SELECT {fieldsBuilder} FROM {TableName} {_options.MainTableAlias} {restriction}";
 
@@ -205,6 +206,22 @@ namespace VManagement.Database.Command
             _command.AddParameters(restriction.Parameters);
         }
 
+        private IEnumerable<string> GetSelectColumns()
+        {
+            if (_options.FetchPredefinedColumns)
+            {
+                return _predefinedSelectColumns ?? throw new CommandBuilderAbortedException("");
+            }
+            else
+            {
+                return TableEntityHelper<TTableEntity>
+                    .GetColumnProperties()
+                    .Select(static property => property.GetCustomAttribute<EntityColumnNameAttribute>())
+                    .Where (static attr => attr is not null)
+                    .Select(static attr => attr!.ColumnName);
+            }
+        }
+
         /// <summary>
         /// Valida se <typeparamref name="TTableEntity"/> informado possui o atributo <see cref="TableEntityAttribute"/> em sua definição.
         /// </summary>
@@ -261,6 +278,8 @@ namespace VManagement.Database.Command
         internal bool PopulateCommandObject { get; set; } = true;
 
         internal bool AppendExistingRestriction { get; set; } = false;
+
+        internal bool FetchPredefinedColumns { get; set; } = false;
 
         /// <summary>
         /// Obtém ou define o alias (apelido) a ser usado para a tabela principal na consulta SQL.

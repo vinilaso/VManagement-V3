@@ -1,11 +1,12 @@
-﻿using VManagement.Commons.Entities;
+﻿using System.Linq.Expressions;
+using VManagement.Commons.Entities;
 using VManagement.Commons.Entities.Interfaces;
 using VManagement.Database.Clauses;
 using VManagement.Database.Generalization;
 
 namespace VManagement.Core.Tests.DAO
 {
-    internal class MockTableEntityDAO<TEntity> : ITableEntityDAO<TEntity> where TEntity : ITableEntity, new()
+    internal class MockTableEntityDAO<TEntity> : ITableEntityDAO<TEntity> where TEntity : class, ITableEntity, new()
     {
         internal int InsertCallCount { get; set; } = 0;
         internal int UpdateCallCount { get; set; } = 0;
@@ -50,6 +51,46 @@ namespace VManagement.Core.Tests.DAO
         }
 
         public bool Exists(Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TSelector? Select<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TSelector> SelectMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TSelector> FetchMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Restriction restriction)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TEntity? Select(Expression<Func<TEntity, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public TSelector? Select<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TSelector> SelectMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TEntity> FetchMany(Expression<Func<TEntity, bool>> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<TSelector> FetchMany<TSelector>(Expression<Func<TEntity, TSelector>> selector, Expression<Func<TEntity, bool>> predicate)
         {
             throw new NotImplementedException();
         }
