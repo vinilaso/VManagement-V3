@@ -60,7 +60,7 @@ namespace VManagement.Database
 
                 IniFile configurationFile = new(_configurationFilePath);
 
-                SqlConnectionStringBuilder connectionStringBuilder = new SqlConnectionStringBuilder
+                SqlConnectionStringBuilder connectionStringBuilder = new()
                 {
                     DataSource = configurationFile.Read("DataSource", "Database"),
                     InitialCatalog = configurationFile.Read("InitialCatalog", "Database"),

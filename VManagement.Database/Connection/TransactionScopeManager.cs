@@ -20,7 +20,7 @@ namespace VManagement.Database.Connection
         /// </summary>
         internal static void Push(VManagementTransaction transaction)
         {
-            var stack = _currentTransactionStack.Value ?? ImmutableStack<VManagementTransaction>.Empty;
+            var stack = _currentTransactionStack.Value ?? [];
             _currentTransactionStack.Value = stack.Push(transaction);
         }
 
