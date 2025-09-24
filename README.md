@@ -115,3 +115,41 @@ Em seguida, execute a query e mapeie o resultado usando `ParseManyTo<T>()`:
 var command = new RawSqlCommand("SELECT ID, RUA FROM ENDERECOS");
 var enderecosSimples = command.ParseManyTo<EnderecoSimples>();
 ```
+
+## Ciclo de vida das entidades
+Você pode executar lógicas customizadas durante o ciclo de vida de uma entidade (antes/depois de inserir, atualizar ou excluir) sobrescrevendo os métodos de hook na sua classe de entidade.
+
+Isso é útil para auditoria, validação ou para disparar outras ações.
+
+```csharp
+[TableEntity("ENDERECOS")]
+public class Endereco : TableEntity<Endereco>
+{
+    // ... propriedades ...
+
+    // Chamado antes de um novo registro ser inserido no banco.
+    public override void OnBeforeInsertCore()
+    {
+        // Exemplo: garantir que o nome da rua seja sempre maiúsculo.
+        if (!string.IsNullOrEmpty(this.Rua))
+        {
+            this.Rua = this.Rua.ToUpper();
+        }
+    }
+
+    // Chamado depois de um registro ser atualizado.
+    public override void OnAfterUpdateCore()
+    {
+        // Lógica depois de atualizar.
+    }
+
+    // Chamado antes de um registro ser excluído.
+    public override void OnBeforeDeleteCore()
+    {
+        // Exemplo: registrar um log antes da exclusão.
+        Console.WriteLine($"Registro de endereço com ID {this.Id} será excluído.");
+    }
+
+    // Existem outros hooks disponíveis, como OnAfterInsert, OnAfterGet, etc.
+}
+```
