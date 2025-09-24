@@ -16,7 +16,7 @@ Um ORM (Object-Relational Mapper) simples e intuitivo para .NET, projetado para 
 
 
 ## Definindo sua entidade
-Para mapear uma tabela do banco de dados, crie uma classe que herde de `TableEntity<T>`.
+Para mapear uma tabela do banco de dados, crie uma classe que herde de `TableEntity<T>`. Essa classe já possui o campo ID (chave primária) mapeado.
 Use os seguintes atributos para configurar o mapeamento:
 
 `[TableEntity("NOME_DA_TABELA")]`: Define o nome da tabela que a classe representa.
@@ -40,6 +40,56 @@ public class Endereco : TableEntity<Endereco>
 }
 ```
 
+## Chaves estrangeiras
+O ORM suporta relacionamentos de chave estrangeira com Lazy Loading automático. Isso significa que a entidade relacionada só é carregada do banco de dados quando sua propriedade de navegação é acessada pela primeira vez.
+
+### Configurando o relacionamento
+Para configurar um relacionamento, use o atributo `ForeignKey` em uma propriedade virtual.
+```csharp
+[TableEntity("CATEGORIAS")]
+public class Categoria : TableEntity<Categoria>
+{
+    [EntityColumnName("DESCRICAO")]
+    public string Descricao { get; set; }
+}
+
+[TableEntity("PRODUTOS")]
+public class Produto : TableEntity<Produto>
+{
+    [EntityColumnName("NOME")]
+    public string Nome { get; set; }
+
+    // Coluna que armazena o ID da categoria
+    [EntityColumnName("ID_CATEGORIA")]
+    public long? IdCategoria { get; set; }
+
+    // Propriedade de navegação para a Categoria
+    // É VIRTUAL para permitir a interceptação do Lazy Loading
+    [ForeignKey<Categoria>("ID_CATEGORIA")]
+    public virtual Categoria Categoria { get; set; }
+}
+```
+
+### Uso
+O ORM gerencia o relacionamento para você.
+
+Quando você acessa a propriedade Categoria pela primeira vez, o ORM executa um `Find` para buscar a categoria correspondente.
+
+Ao atribuir um objeto à propriedade de navegação, o ORM atualiza automaticamente a propriedade de ID correspondente.
+
+```csharp
+var novaCategoria = Categoria.Find(2);
+var produto = Produto.New();
+produto.Nome = "Novo Produto";
+
+// Atribui a instância da categoria
+produto.Categoria = novaCategoria;
+
+// O ORM sincroniza o ID automaticamente
+Console.WriteLine(produto.IdCategoria); // Imprime '2'
+
+produto.Save(); // Salva o produto com o ID_CATEGORIA correto
+```
 
 ## Utilizando o Sistema
 É uma boa prática encapsular todas as operações de banco de dados em uma transação para garantir a atomicidade e consistência dos dados.
@@ -128,7 +178,7 @@ public class Endereco : TableEntity<Endereco>
     // ... propriedades ...
 
     // Chamado antes de um novo registro ser inserido no banco.
-    public override void OnBeforeInsertCore()
+    public override void OnBeforeInsert()
     {
         // Exemplo: garantir que o nome da rua seja sempre maiúsculo.
         if (!string.IsNullOrEmpty(this.Rua))
@@ -137,19 +187,19 @@ public class Endereco : TableEntity<Endereco>
         }
     }
 
-    // Chamado depois de um registro ser atualizado.
-    public override void OnAfterUpdateCore()
+    // Chamado antes de um registro ser atualizado.
+    public override void OnBeforeUpdate()
     {
-        // Lógica depois de atualizar.
+        // Lógica de validação ou modificação antes de atualizar.
     }
 
     // Chamado antes de um registro ser excluído.
-    public override void OnBeforeDeleteCore()
+    public override void OnBeforeDelete()
     {
         // Exemplo: registrar um log antes da exclusão.
         Console.WriteLine($"Registro de endereço com ID {this.Id} será excluído.");
     }
 
-    // Existem outros hooks disponíveis, como OnAfterInsert, OnAfterGet, etc.
+    // Existem outros hooks disponíveis, como OnAfterInsert, OnAfterUpdate, etc.
 }
 ```
